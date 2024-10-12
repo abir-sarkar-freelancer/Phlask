@@ -177,9 +177,3 @@ Please make sure your code follows PSR standards.
 ## License
 
 Phlask is open-source and available under the [MIT License](LICENSE).
-
----
-
-### Conclusion
-
-This README gives a full overview of your Phlask framework, including installation, usage, and the main components of the framework. Feel free to customize it further to fit any additional features or details you might want to highlight.
