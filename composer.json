@@ -1,0 +1,13 @@
+{
+    "name": "coolphpdev/phlask",
+    "description": "Phlask - A simple PHP micro-framework inspired by Flask",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Phlask\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.2.0"
+    }
+}
