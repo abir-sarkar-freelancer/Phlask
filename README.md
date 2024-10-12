@@ -1,43 +1,56 @@
 # Phlask - A Lightweight PHP Microframework
 
-Phlask is a lightweight, Flask-inspired microframework for PHP, designed to provide a simple and flexible way to build web applications. With an easy-to-understand structure, Phlask handles routing, request processing, templating, and database interaction, making it ideal for small to medium-sized applications.
+Phlask is a lightweight, Flask-inspired microframework for PHP, designed to provide a simple and flexible way to build web applications and APIs. With an easy-to-understand structure, Phlask handles routing, request processing, templating, API development, and static asset management, making it ideal for small to medium-sized applications.
 
 ## Features
 
-- **Routing**: Define routes for GET and POST requests with ease.
-- **Request Handling**: Simple request object to access method, URI, and parameters.
-- **Response Handling**: Easily send responses with status codes.
+- **Routing**: Define routes for GET, POST, PUT, and DELETE requests with ease.
+- **Request Handling**: Simple request object to access method, URI, parameters, and JSON data.
+- **Response Handling**: Easily send HTML or JSON responses with status codes.
 - **Templating**: Render dynamic HTML views using the built-in templating system.
-- **Database Interaction**: Basic database interaction using PDO with support for singleton pattern.
-- **Static Assets**: Helper methods to handle static assets like CSS, JS, and images.
+- **API Support**: Create RESTful APIs with JSON responses.
+- **Static Asset Management**: Helper methods to handle static assets like CSS, JS, and images.
 
 ## Installation
 
 ### Requirements
-- PHP 7.4 or higher
+- PHP 8.2 or higher
 - Composer (for dependency management)
-- MySQL (or any PDO-compatible database)
 
 ### Step-by-Step Setup
 
-1. **Clone the repository**:
+1. **Create a new project directory**:
    ```bash
-   git clone https://github.com/yourusername/phlask.git
-   cd phlask
+   mkdir my-phlask-project
+   cd my-phlask-project
    ```
 
-2. **Configure the database**:
-   In the `src/Config/config.php` file, add your database credentials:
-   ```php
-   return [
-       'host' => 'localhost',
-       'database' => 'your_database_name',
-       'username' => 'your_username',
-       'password' => 'your_password',
-   ];
+2. **Initialize Composer**:
+   ```bash
+   composer init
    ```
 
-3. **Run your application**:
+3. **Install Phlask** (Note: This step is hypothetical as Phlask is not actually published):
+   ```bash
+   composer require your-vendor/phlask
+   ```
+
+4. **Create the project structure**:
+   ```
+   my-phlask-project/
+   ├── public/
+   │   ├── index.php
+   │   └── .htaccess
+   ├── src/
+   │   └── Views/
+   │       └── home.php
+   └── vendor/
+   ```
+
+5. **Configure your web server**:
+   Ensure that your web server is configured to use the `public` directory as the document root.
+
+6. **Run your application**:
    Start your local development server using PHP:
    ```bash
    php -S localhost:8000 -t public/
@@ -48,21 +61,21 @@ Phlask is a lightweight, Flask-inspired microframework for PHP, designed to prov
 
 ### Defining Routes
 
-Phlask allows you to define routes for both GET and POST requests.
-
 ```php
 // Initialize the app
 $app = new Phlask\Core\App();
 
-// Define a GET route for the home page
-$app->get('/', function($request) {
-    return new Phlask\Core\Response('Welcome to Phlask!');
+// Define a GET route
+$app->get('/', function(Phlask\Core\Request $request) {
+    return Phlask\Core\Template::make('home.php', ['title' => 'Welcome to Phlask']);
 });
 
-// Define a POST route
-$app->post('/submit', function($request) {
-    $name = $request->getParam('name');
-    return new Phlask\Core\Response("Hello, {$name}");
+// Define an API route
+$app->api('/api/v1', function($api) {
+    $api->get('/users', function(Phlask\Core\Request $request) {
+        $users = [['id' => 1, 'name' => 'John Doe']];
+        return new Phlask\Core\JsonResponse($users);
+    });
 });
 
 // Run the app
@@ -71,109 +84,69 @@ $app->run();
 
 ### Working with Requests
 
-The `Request` class provides access to the incoming request's method, URI, and parameters:
-
 ```php
-$request->getMethod(); // GET or POST
-$request->getUri();    // URI of the request
-$request->getParam('name'); // Retrieves GET or POST parameter 'name'
+$request->getMethod();  // GET, POST, PUT, DELETE
+$request->getUri();     // URI of the request
+$request->getParam('name');  // Retrieves GET or POST parameter 'name'
+$request->getJsonData();  // Retrieves JSON data from request body
 ```
 
 ### Sending Responses
 
-Use the `Response` class to send responses back to the client:
-
 ```php
+// HTML Response
 return new Phlask\Core\Response('Hello, World!', 200);
-```
 
-You can set custom status codes like `404` or `500`:
-
-```php
-return new Phlask\Core\Response('Not Found', 404);
+// JSON Response
+return new Phlask\Core\JsonResponse(['message' => 'Hello, World!'], 200);
 ```
 
 ### Templating
 
-Phlask includes a simple templating engine to render views. Set your views directory with `Template::setViewsPath()` and use `Template::make()` to render a template:
-
 ```php
-Phlask\Core\Template::setViewsPath(__DIR__ . '/views');
+Phlask\Core\Template::setViewsPath(__DIR__ . '/../src/Views');
 
-$app->get('/about', function() {
-    return Phlask\Core\Template::make('about.php', ['name' => 'Phlask']);
-});
+return Phlask\Core\Template::make('home.php', ['title' => 'Phlask']);
 ```
 
-In the view file (e.g., `about.php`):
+In the view file (e.g., `home.php`):
 ```php
-<h1>Welcome to <?= $name; ?></h1>
-```
-
-### Static Asset Management
-
-Phlask provides helper methods for managing static assets like CSS, JS, and images. You can use these helper functions in your templates to correctly link your static files:
-
-```php
-<link rel="stylesheet" href="<?= Phlask\Core\Helper::css('style.css'); ?>">
-<script src="<?= Phlask\Core\Helper::js('app.js'); ?>"></script>
-<img src="<?= Phlask\Core\Helper::image('logo.png'); ?>" alt="Logo">
-```
-
-### Database Interaction
-
-Phlask comes with a simple ORM-like structure using the `Model` class. Define your models by extending `Phlask\Core\Model` and specify the `$table` and `$fillable` properties:
-
-```php
-class User extends Phlask\Core\Model {
-    protected static $table = 'users';
-    protected static $fillable = ['name', 'email'];
-}
-```
-
-You can perform database queries like:
-```php
-$users = User::all(); // Retrieve all users
-$user = User::find(1); // Find a user by ID
-User::create(['name' => 'John Doe', 'email' => 'john@example.com']); // Insert a new user
+<h1><?= htmlspecialchars($title) ?></h1>
+<link rel="stylesheet" href="{{ css('styles.css') }}">
+<script src="{{ js('app.js') }}"></script>
+<img src="{{ image('logo.png') }}" alt="Logo">
 ```
 
 ## Directory Structure
 
 ```
-/src
-  /Config
-    config.php          # Database configuration
-  /Core
-    App.php             # Main application class
-    Router.php          # Routing logic
-    Request.php         # Request handling
-    Response.php        # Response handling
-    Template.php        # Templating engine
-    Model.php           # Base model for database interaction
-    Database.php        # PDO database connection
-    Helper.php          # Static asset helper functions
-/public
-  index.php             # Entry point for the application
-  /static
-    /css                # CSS files
-    /js                 # JavaScript files
-    /images             # Image files
-/views
-  about.php             # Example view file
+my-phlask-project/
+├── public/
+│   ├── index.php
+│   ├── .htaccess
+│   └── static/
+│       ├── css/
+│       ├── js/
+│       └── images/
+├── src/
+│   ├── Core/  (provided by Phlask)
+│   │   ├── App.php
+│   │   ├── Router.php
+│   │   ├── Request.php
+│   │   ├── Response.php
+│   │   ├── JsonResponse.php
+│   │   ├── Template.php
+│   │   ├── Helper.php
+│   │   └── ApiGroup.php
+│   └── Views/
+│       └── home.php
+└── vendor/
 ```
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute to Phlask, please follow these steps:
-
-1. Fork the repository.
-2. Create a new feature branch.
-3. Make your changes and commit them.
-4. Submit a pull request.
-
-Please make sure your code follows PSR standards.
+Contributions to Phlask are welcome! Please submit pull requests or open issues on the GitHub repository.
 
 ## License
 
-Phlask is open-source and available under the [MIT License](LICENSE).
+Phlask is open-source software licensed under the MIT license.
