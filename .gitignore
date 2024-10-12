@@ -28,6 +28,7 @@ coverage/
 # Ignore compiled classes
 /vendor/.composer
 /vendor/bin/
+/vendor
 
 # Ignore node_modules (if any)
 /node_modules
